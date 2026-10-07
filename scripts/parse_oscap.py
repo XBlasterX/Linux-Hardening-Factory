@@ -38,7 +38,6 @@ def parse_report(path):
 
 
 def main():
-    PROJECT_DIR = Path(__file__).resolve().parent.parent
     report_dir = Path(
         sys.argv[1] if len(sys.argv) > 1
         else "reports/before"
@@ -51,7 +50,7 @@ def main():
         print(f"No XML reports found in {report_dir}")
         sys.exit(1)
 
-    with open(SUMMARY_FILE, "w", encoding="utf-8") as file:
+    with open(SUMMARY_FILE, "r", encoding="utf-8") as file:
         file.write("# OpenSCAP CIS Baseline Summary\n\n")
 
         for xml_file in xml_files:
@@ -84,7 +83,7 @@ def main():
                     print(f"- `{rule}`", file=file)
 
                 print(file=file)
-        
+
 if __name__ == "__main__":
     main()
 

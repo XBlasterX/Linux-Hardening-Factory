@@ -28,6 +28,7 @@
 
     - name: Allow Ansible user passwordless sudo
       ansible.builtin.copy:
+        validate: /usr/sbin/visudo -csf %s
         dest: "/etc/sudoers.d/{{ ansible_admin_user }}"
         content: "{{ ansible_admin_user }} ALL=(ALL) NOPASSWD: ALL\n"
         owner: root

@@ -19,7 +19,10 @@
 
 - name: Activate initialized AIDE database
   ansible.builtin.command:
-    cmd: mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
+    argv:
+      chdir: /var/lib/aide/aide.db.new.gz
+    creates: /var/lib/aide/aide.db.gz
+    removes: /var/lib/aide/aide.db.new.gz
   when: not aide_database.stat.exists
 
 

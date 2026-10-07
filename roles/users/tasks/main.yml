@@ -1,6 +1,7 @@
 ---
 - name: Configure sudo security defaults
   ansible.builtin.copy:
+    validate: /usr/sbin/visudo -csf %s
     dest: /etc/sudoers.d/10-security-baseline
     owner: root
     group: root
