@@ -21,7 +21,7 @@
       - --report
       - /var/tmp/oscap/report-{{ scan_phase }}.html
       - /usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml
-  register: cis_scan
+  register: compliance_cis_scan
   changed_when: false
   failed_when: cis_scan.rc not in [0, 2]
 

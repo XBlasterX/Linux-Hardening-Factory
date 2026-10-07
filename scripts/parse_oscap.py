@@ -50,7 +50,7 @@ def main():
         print(f"No XML reports found in {report_dir}")
         sys.exit(1)
 
-    with open(SUMMARY_FILE, "r", encoding="utf-8") as file:
+    with open(SUMMARY_FILE, "w", encoding="utf-8") as file:
         file.write("# OpenSCAP CIS Baseline Summary\n\n")
 
         for xml_file in xml_files:
@@ -66,7 +66,7 @@ def main():
                 if tested > 0
                 else 0
             )
-            with open(SUMMARY_FILE, "w", encoding="utf-8") as file:
+            with open(SUMMARY_FILE, "a", encoding="utf-8") as file:
                 print(f"## {xml_file.stem}", file=file)
                 print(file=file)
                 print(f"- OpenSCAP score: {score}", file=file)

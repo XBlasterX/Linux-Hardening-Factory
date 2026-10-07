@@ -1,0 +1,3 @@
+[31m[34m]8;;https://docs.ansible.com/projects/lint/rules/syntax-check/\syntax-check[unknown-module]]8;;\[0m[2m:[0m [31mcouldn't resolve module/action 'ansible.posix.authorized_key'. This often indicates a misspelling, missing collection, or incorrect module path.[0m
+[35mbootstrap.yml[0m:18:7
+[0m

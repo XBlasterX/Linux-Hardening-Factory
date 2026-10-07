@@ -8,22 +8,22 @@
 - name: Check whether AIDE database already exists
   ansible.builtin.stat:
     path: /var/lib/aide/aide.db.gz
-  register: aide_database
+  register: integrity_aide_database
 
 
 - name: Initialize AIDE database
   ansible.builtin.command:
     cmd: /usr/sbin/aide --init
-  when: not aide_database.stat.exists
+    creates: /var/lib/aide/aide.db.new.gz
+  when: not integrity_aide_database.stat.exists
 
 
 - name: Activate initialized AIDE database
   ansible.builtin.command:
-    argv:
-      chdir: /var/lib/aide/aide.db.new.gz
+    cmd: mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
     creates: /var/lib/aide/aide.db.gz
     removes: /var/lib/aide/aide.db.new.gz
-  when: not aide_database.stat.exists
+  when: not integrity_aide_database.stat.exists
 
 
 - name: Schedule daily AIDE integrity check
