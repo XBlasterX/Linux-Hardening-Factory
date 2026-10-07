@@ -1,0 +1,15 @@
+*.DS_STORE
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+!*.pub
+vault_password*
+*.vault
+*.retry
+.ansible/
+.ansible-lint
+__pycache__/
+venv/
+.venv/
+env/

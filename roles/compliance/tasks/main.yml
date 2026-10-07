@@ -1,0 +1,40 @@
+---
+- name: Create OpenSCAP report directory
+  ansible.builtin.file:
+    path: /var/tmp/oscap
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+
+- name: Run CIS Server Level 1 assessment
+  ansible.builtin.command:
+    argv:
+      - oscap
+      - xccdf
+      - eval
+      - --profile
+      - xccdf_org.ssgproject.content_profile_cis_server_l1
+      - --results
+      - /var/tmp/oscap/results-{{ scan_phase }}.xml
+      - --report
+      - /var/tmp/oscap/report-{{ scan_phase }}.html
+      - /usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml
+  register: cis_scan
+  changed_when: false
+  failed_when: cis_scan.rc not in [0, 2]
+
+
+- name: Download HTML report to Ansible controller
+  ansible.builtin.fetch:
+    src: /var/tmp/oscap/report-{{ scan_phase }}.html
+    dest: "reports/{{ scan_phase }}/{{ inventory_hostname }}.html"
+    flat: true
+
+
+- name: Download XML results to Ansible controller
+  ansible.builtin.fetch:
+    src: /var/tmp/oscap/results-{{ scan_phase }}.xml
+    dest: "reports/{{ scan_phase }}/{{ inventory_hostname }}.xml"
+    flat: true

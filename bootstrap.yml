@@ -1,0 +1,35 @@
+---
+- name: Bootstrap managed servers
+  hosts: webservers
+  become: true
+
+  vars:
+    ansible_admin_user: ansible
+
+  tasks:
+    - name: Create Ansible administration user
+      ansible.builtin.user:
+        name: "{{ ansible_admin_user }}"
+        groups: wheel
+        append: true
+        create_home: true
+        shell: /bin/bash
+
+    - name: Install controller SSH key
+      ansible.posix.authorized_key:
+        user: "{{ ansible_admin_user }}"
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+
+    - name: Validate sudoers configuration
+      ansible.builtin.command:
+        cmd: visudo -cf /etc/sudoers
+      changed_when: false
+
+    - name: Allow Ansible user passwordless sudo
+      ansible.builtin.copy:
+        dest: "/etc/sudoers.d/{{ ansible_admin_user }}"
+        content: "{{ ansible_admin_user }} ALL=(ALL) NOPASSWD: ALL\n"
+        owner: root
+        group: root
+        mode: "0440"

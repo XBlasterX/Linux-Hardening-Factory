@@ -1,0 +1,32 @@
+---
+- name: Install AIDE
+  ansible.builtin.dnf:
+    name: aide
+    state: present
+
+
+- name: Check whether AIDE database already exists
+  ansible.builtin.stat:
+    path: /var/lib/aide/aide.db.gz
+  register: aide_database
+
+
+- name: Initialize AIDE database
+  ansible.builtin.command:
+    cmd: /usr/sbin/aide --init
+  when: not aide_database.stat.exists
+
+
+- name: Activate initialized AIDE database
+  ansible.builtin.command:
+    cmd: mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
+  when: not aide_database.stat.exists
+
+
+- name: Schedule daily AIDE integrity check
+  ansible.builtin.cron:
+    name: "Daily AIDE integrity check"
+    user: root
+    hour: "5"
+    minute: "0"
+    job: "/usr/sbin/aide --check >> /var/log/aide-check.log 2>&1"

@@ -1,0 +1,7 @@
+---
+- name: Install security assessment tools
+  ansible.builtin.dnf:
+    name:
+      - openscap-scanner
+      - scap-security-guide
+    state: present

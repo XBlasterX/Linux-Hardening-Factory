@@ -1,0 +1,16 @@
+---
+- name: Configure sudo security defaults
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/10-security-baseline
+    owner: root
+    group: root
+    mode: "0440"
+    content: |
+      Defaults use_pty
+      Defaults logfile="/var/log/sudo.log"
+
+
+- name: Validate sudo configuration
+  ansible.builtin.command:
+    cmd: visudo -cf /etc/sudoers
+  changed_when: false

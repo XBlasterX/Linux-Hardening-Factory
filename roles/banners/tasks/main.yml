@@ -1,0 +1,21 @@
+---
+- name: Configure local login banner
+  ansible.builtin.copy:
+    dest: /etc/issue
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      Authorized access only.
+      All activity may be monitored and recorded.
+
+
+- name: Configure remote login banner
+  ansible.builtin.copy:
+    dest: /etc/issue.net
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      Authorized access only.
+      All activity may be monitored and recorded.
