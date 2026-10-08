@@ -9,3 +9,4 @@
     - banners
     - integrity
     - ssh_hardening
+    - kernel_hardening

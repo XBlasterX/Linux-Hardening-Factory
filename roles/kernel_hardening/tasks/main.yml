@@ -1,0 +1,25 @@
+---
+- name: Disable procesess tracking
+  ansible.posix.sysctl:
+    name: kernel.yama.ptrace_scope
+    value: '1'
+    state: present
+    sysctl_file: /etc/sysctl.d/60-security-hardening.conf
+    sysctl_set: true
+    reload: true
+- name: New interfaces policy
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.default.accept_redirects
+    value: '0'
+    state: present
+    sysctl_file: /etc/sysctl.d/60-security-hardening.conf
+    sysctl_set: true
+    reload: true
+- name: Block ICMP redirects
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.accept_redirects
+    value: '0'
+    state: present
+    sysctl_file: /etc/sysctl.d/60-security-hardening.conf
+    sysctl_set: true
+    reload: true
