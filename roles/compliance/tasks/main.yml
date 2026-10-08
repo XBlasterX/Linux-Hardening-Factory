@@ -23,7 +23,7 @@
       - /usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml
   register: compliance_cis_scan
   changed_when: false
-  failed_when: cis_scan.rc not in [0, 2]
+  failed_when: compliance_cis_scan.rc not in [0, 2]
 
 
 - name: Download HTML report to Ansible controller

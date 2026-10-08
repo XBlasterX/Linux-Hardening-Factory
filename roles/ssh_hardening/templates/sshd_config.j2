@@ -1,0 +1,8 @@
+Port {{ ssh_custom_port | default(22) }}
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitEmptyPasswords no
+MaxAuthTries 3
+X11Forwarding no
+LoginGraceTime 60
