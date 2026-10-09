@@ -5,3 +5,12 @@
       - openscap-scanner
       - scap-security-guide
     state: present
+
+- name: TIMEOUT SUDO
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/60-cis-sudo
+    content: "Defaults timestamp_timeout=5\n"
+    owner: root
+    group: root
+    mode: '0440'
+    validate: '/usr/sbin/visudo -cf %s'

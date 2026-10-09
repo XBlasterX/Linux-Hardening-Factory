@@ -4,7 +4,6 @@
     name: aide
     state: present
 
-
 - name: Check whether AIDE database already exists
   ansible.builtin.stat:
     path: /var/lib/aide/aide.db.gz
@@ -25,6 +24,26 @@
     removes: /var/lib/aide/aide.db.new.gz
   when: not integrity_aide_database.stat.exists
 
+- name: Check auditd tools
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /usr/sbin/auditctl
+    - /usr/sbin/auditd
+    - /usr/sbin/ausearch
+    - /usr/sbin/aureport
+    - /usr/sbin/autrace
+    - /usr/sbin/augenrules
+  register: integrity_audit_tools_stat
+
+- name: Add Aide rules
+  ansible.builtin.lineinfile:
+    path: /etc/aide.conf
+    regexp: "^{{ item.stat.path | regex_escape() }}\\s+"
+    line: "{{ item.stat.path }} p+i+n+u+g+s+b+acl+xattrs+sha512"
+    state: present
+  loop: "{{ integrity_audit_tools_stat.results }}"
+  when: item.stat.exists
 
 - name: Schedule daily AIDE integrity check
   ansible.builtin.cron:

@@ -2,6 +2,7 @@
 - name: Create files
   ansible.builtin.file:
     path: /var/lib/ssh-hardening/
+    state: directory
     owner: root
     group: root
     mode: '0700'
@@ -11,7 +12,7 @@
     remote_src: true
     src: /etc/ssh/sshd_config.d/00-hardening.conf
     dest: /var/lib/ssh-hardening/00-hardening.conf.good
-    mode: '0700'
+    mode: '0600'
     owner: root
     group: root
     force: false
@@ -23,6 +24,25 @@
     mode: '0700'
     owner: root
     group: root
+
+- name: Check conf changes
+  ansible.builtin.template:
+    src: sshd_config.j2
+    dest: /etc/ssh/sshd_config.d/00-hardening.conf
+    mode: '0600'
+    owner: root
+    group: root
+  check_mode: true
+  register: ssh_hardening_ssh_config_preview
+
+- name: Schedule SSH rollback
+  ansible.builtin.command:
+    argv:
+      - systemd-run
+      - --unit=ssh-rollback
+      - --on-active=180s
+      - /usr/local/sbin/ssh-rollback.sh
+  when: ssh_hardening_ssh_config_preview.changed
 
 - name: Config safe SSH
   ansible.builtin.template:
@@ -37,7 +57,15 @@
 - name: Force handlers
   ansible.builtin.meta: flush_handlers
 
+- name: Reset connection
+  ansible.builtin.meta: reset_connection
+
 - name: Wait for connection
   ansible.builtin.wait_for_connection:
     delay: 3
     timeout: 25
+
+- name: Cancel timer
+  ansible.builtin.command:
+    cmd: systemctl stop ssh-rollback.timer
+  when: ssh_hardening_ssh_config_preview.changed
