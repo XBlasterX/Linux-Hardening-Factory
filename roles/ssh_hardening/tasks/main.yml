@@ -1,4 +1,29 @@
 ---
+- name: Create files
+  ansible.builtin.file:
+    path: /var/lib/ssh-hardening/
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: Backup copy
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/ssh/sshd_config.d/00-hardening.conf
+    dest: /var/lib/ssh-hardening/00-hardening.conf.good
+    mode: '0700'
+    owner: root
+    group: root
+    force: false
+
+- name: Rollback install
+  ansible.builtin.copy:
+    src: ssh-rollback.sh
+    dest: /usr/local/sbin/ssh-rollback.sh
+    mode: '0700'
+    owner: root
+    group: root
+
 - name: Config safe SSH
   ansible.builtin.template:
     src: sshd_config.j2
