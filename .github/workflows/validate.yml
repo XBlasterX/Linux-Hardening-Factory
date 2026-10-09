@@ -18,12 +18,13 @@ jobs:
 
         - name: pip install and ansible modules
           run: |
-                python -m pip install --upgrade pip
+                python -m pip install
                 pip install ansible-core ansible-lint ansible
 
         - name: Ansible collection install
           run: |
                 ansible-galaxy collection install -r collections/requirements.yml
+                ansible-galaxy collection install community.general --upgrade
 
         - name: Ansible playbook check
           run: |
