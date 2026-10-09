@@ -65,24 +65,23 @@ def main():
                 passed / tested * 100
                 if tested > 0
                 else 0
-            )
-            with open(SUMMARY_FILE, "a", encoding="utf-8") as file:
-                print(f"## {xml_file.stem}", file=file)
-                print(file=file)
-                print(f"- OpenSCAP score: {score}", file=file)
-                print(f"- PASS: {passed}", file=file)
-                print(f"- FAIL: {failed}", file=file)
-                print(f"- NOT APPLICABLE: {results['notapplicable']}", file=file)
-                print(f"- PASS RATE: {pass_rate:.1f}%", file=file)
-                print(file=file)
+         )
+            print(f"## {xml_file.stem}", file=file)
+            print(file=file)
+            print(f"- OpenSCAP score: {score}", file=file)
+            print(f"- PASS: {passed}", file=file)
+            print(f"- FAIL: {failed}", file=file)
+            print(f"- NOT APPLICABLE: {results['notapplicable']}", file=file)
+            print(f"- PASS RATE: {pass_rate:.1f}%", file=file)
+            print(file=file)
 
-                print("### First failed rules", file=file)
-                print(file=file)
+            print("### First failed rules", file=file)
+            print(file=file)
 
-                for rule in failed_rules[:15]:
-                    print(f"- `{rule}`", file=file)
+            for rule in failed_rules[:15]:
+                print(f"- `{rule}`", file=file)
 
-                print(file=file)
+            print(file=file)
 
 if __name__ == "__main__":
     main()
