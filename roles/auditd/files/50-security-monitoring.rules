@@ -1,0 +1,8 @@
+-a always,exit -F arch=b64 -F path=/etc/passwd -F perm=wa -k identity_changes
+-a always,exit -F arch=b64 -F path=/etc/group -F perm=wa -k identity_changes
+-a always,exit -F arch=b64 -F path=/etc/shadow -F perm=wa -k identity_changes
+-a always,exit -F arch=b64 -F path=/etc/sudoers -F perm=wa -k privilege_changes
+-a always,exit -F arch=b64 -F dir=/etc/sudoers.d/ -F perm=wa -k privilege_changes
+-a always,exit -F arch=b64 -F path=/etc/ssh/sshd_config -F perm=wa -k ssh_config_changes
+-a always,exit -F arch=b64 -F dir=/etc/ssh/sshd_config.d/ -F perm=wa -k ssh_config_changes
+

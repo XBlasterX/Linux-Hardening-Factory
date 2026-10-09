@@ -10,3 +10,6 @@
     - integrity
     - ssh_hardening
     - kernel_hardening
+    - firewall
+    - selinux
+    - auditd

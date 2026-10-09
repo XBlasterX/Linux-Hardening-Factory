@@ -1,0 +1,32 @@
+---
+- name: Firewalld state
+  ansible.builtin.systemd_service:
+    service: "{{ item }}"
+    enabled: true
+    state: started
+  loop:
+    - firewalld
+
+- name: Enable ssh
+  ansible.posix.firewalld:
+    service: ssh
+    state: enabled
+    zone: public
+    permanent: true
+    immediate: true
+
+- name: Open HTTP
+  ansible.posix.firewalld:
+    state: enabled
+    zone: public
+    port: 80/tcp
+    permanent: true
+    immediate: true
+
+- name: Close cockpit
+  ansible.posix.firewalld:
+    service: cockpit
+    state: disabled
+    zone: public
+    permanent: true
+    immediate: true

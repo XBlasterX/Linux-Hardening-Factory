@@ -1,0 +1,23 @@
+---
+
+- name: Install auditd
+  ansible.builtin.dnf:
+    name:
+      - audit
+      - audit-libs
+    state: present
+
+- name: Auditd enabled
+  ansible.builtin.systemd_service:
+    service: auditd
+    state: started
+    enabled: true
+
+- name: Deploy monitoring rules
+  ansible.builtin.copy:
+    src: 50-security-monitoring.rules
+    dest: /etc/audit/rules.d/50-security-monitoring.rules
+    owner: root
+    group: root
+    mode: "0640"
+  notify: auditd_reload_audit_rules

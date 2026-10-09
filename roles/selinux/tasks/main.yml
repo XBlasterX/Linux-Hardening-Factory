@@ -1,0 +1,28 @@
+---
+- name: Selinux policy
+  ansible.posix.selinux:
+    state: enforcing
+    policy: targeted
+
+- name: Apache catalog permissions
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: /srv/prodapp
+      mode: '0711'
+    - path: /srv/prodapp/public
+      mode: '0755'
+    - path: /srv/prodapp/public/index.html
+      mode: '0644'
+
+- name: Apache catalog permissions
+  community.general.sefcontext:
+    target: '/srv/prodapp/public(/.*)?'
+    setype: httpd_sys_content_t
+    state: present
+
+- name: Apply SELinux context to files (restorecon)
+  ansible.builtin.command: restorecon -vR /srv/prodapp/public
+  register: selinux_restorecon_exec
+  changed_when: selinux_restorecon_exec.stdout != ""
