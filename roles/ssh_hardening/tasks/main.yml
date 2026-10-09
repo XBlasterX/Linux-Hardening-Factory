@@ -35,7 +35,7 @@
   check_mode: true
   register: ssh_hardening_ssh_config_preview
 
-- name: Schedule SSH rollback
+- name: Schedule SSH rollback # noqa: no-handler
   ansible.builtin.command:
     argv:
       - systemd-run
@@ -43,6 +43,7 @@
       - --on-active=180s
       - /usr/local/sbin/ssh-rollback.sh
   when: ssh_hardening_ssh_config_preview.changed
+  changed_when: true
 
 - name: Config safe SSH
   ansible.builtin.template:
@@ -65,7 +66,8 @@
     delay: 3
     timeout: 25
 
-- name: Cancel timer
-  ansible.builtin.command:
-    cmd: systemctl stop ssh-rollback.timer
+- name: Cancel timer # noqa: no-handler
+  ansible.builtin.systemd:
+    name: ssh-rollback.timer
+    state: stopped
   when: ssh_hardening_ssh_config_preview.changed
