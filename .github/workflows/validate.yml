@@ -24,7 +24,6 @@ jobs:
         - name: Ansible collection install
           run: |
                 ansible-galaxy collection install -r collections/requirements.yml
-                ansible-galaxy collection install community.general --upgrade
 
         - name: Ansible playbook check
           run: |
