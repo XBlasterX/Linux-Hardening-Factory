@@ -2,6 +2,7 @@
 - name: Bootstrap managed servers
   hosts: webservers
   become: true
+  gather_facts: false
 
   vars:
     ansible_admin_user: ansible

@@ -1,7 +1,7 @@
 ---
 - name: Harden RHEL web server fleet
-  hosts: webservers
   become: true
+  hosts: webservers
 
   roles:
     - baseline

@@ -4,8 +4,8 @@
   become: true
 
   roles:
-    - baseline
     - users
+    - baseline
     - banners
     - integrity
     - ssh_hardening
