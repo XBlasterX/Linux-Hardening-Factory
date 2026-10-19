@@ -12,25 +12,6 @@
     path: /etc/ssh/sshd_config.d/00-hardening.conf
   register: ssh_hardening_existing_conf
 
-- name: Backup current SSH drop-in configuration
-  ansible.builtin.copy:
-    remote_src: true
-    src: /etc/ssh/sshd_config.d/00-hardening.conf
-    dest: /var/lib/ssh-hardening/00-hardening.conf.good
-    mode: '0600'
-    owner: root
-    group: root
-    force: false
-  when: ssh_hardening_existing_conf.stat.exists
-
-- name: Install rollback script
-  ansible.builtin.copy:
-    src: ssh-rollback.sh
-    dest: /usr/local/sbin/ssh-rollback.sh
-    mode: '0700'
-    owner: root
-    group: root
-
 - name: Preview SSH configuration changes
   ansible.builtin.template:
     src: sshd_config.j2
@@ -40,6 +21,24 @@
     group: root
   check_mode: true
   register: ssh_hardening_ssh_config_preview
+
+- name: Backup current SSH drop-in configuration before change
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/ssh/sshd_config.d/00-hardening.conf
+    dest: /var/lib/ssh-hardening/00-hardening.conf.good
+    mode: '0600'
+    owner: root
+    group: root
+  when: ssh_hardening_existing_conf.stat.exists and ssh_hardening_ssh_config_preview.changed
+
+- name: Install rollback script
+  ansible.builtin.copy:
+    src: ssh-rollback.sh
+    dest: /usr/local/sbin/ssh-rollback.sh
+    mode: '0700'
+    owner: root
+    group: root
 
 - name: Schedule SSH rollback  # noqa: no-handler
   ansible.builtin.command:
