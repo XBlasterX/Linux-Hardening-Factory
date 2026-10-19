@@ -107,7 +107,6 @@ A passing CI run verifies **static checks**, not end-to-end hardening or complia
 ├── group_vars/all.yml                # Central configuration defaults
 ├── inventory/hosts.ini               # Lab RHEL VM inventory
 ├── roles/
-│   ├── baseline/                      # Security assessment packages
 │   ├── users/                         # Sudo security defaults and timeout
 │   ├── banners/                       # Login banners
 │   ├── integrity/                     # AIDE integrity checks and cron service
@@ -116,7 +115,7 @@ A passing CI run verifies **static checks**, not end-to-end hardening or complia
 │   ├── firewall/                      # firewalld package and zone rules
 │   ├── selinux/                       # SELinux policy, directories, and labels
 │   ├── auditd/                        # Audit monitoring rules
-│   └── compliance/                    # OpenSCAP assessment tasks and defaults
+│   └── compliance/                    # OpenSCAP packages, assessment, and defaults
 ├── scripts/parse_oscap.py            # XML -> Markdown summary
 ├── reports/                           # Scans and checkpoints
 ├── bootstrap.yml                      # Automation account provisioning
@@ -148,7 +147,7 @@ ansible-playbook scan.yml -e "scan_phase=after"
 python3 scripts/parse_oscap.py reports/after
 ```
 
-[`bootstrap.yml`](bootstrap.yml) is provided to create the Ansible administration account and install the controller's SSH public key (configurable via `ssh_public_key_path` or `SSH_PUBLIC_KEY_PATH`), but it needs **working initial administrative credentials**. It also grants `NOPASSWD: ALL` sudo privileges to that account; do not adopt this model unchanged for production systems.
+[`bootstrap.yml`](bootstrap.yml) is provided to create the Ansible administration account and install the controller's SSH public key (configurable via `ssh_public_key`), but it needs **working initial administrative credentials**. It also grants `NOPASSWD: ALL` sudo privileges to that account; do not adopt this model unchanged for production systems.
 
 Local static validation:
 

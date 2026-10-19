@@ -1,4 +1,11 @@
 ---
+- name: Install OpenSCAP scanner and security guides
+  ansible.builtin.dnf:
+    name:
+      - openscap-scanner
+      - scap-security-guide
+    state: present
+
 - name: Create OpenSCAP report directory
   ansible.builtin.file:
     path: "{{ compliance_remote_report_dir }}"

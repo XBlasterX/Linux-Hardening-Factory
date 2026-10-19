@@ -3,4 +3,3 @@ compliance_scan_phase: "{{ scan_phase | default('assessment') }}"
 compliance_cis_profile: "xccdf_org.ssgproject.content_profile_cis_server_l1"
 compliance_datastream: "/usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml"
 compliance_remote_report_dir: "/var/tmp/oscap"
-

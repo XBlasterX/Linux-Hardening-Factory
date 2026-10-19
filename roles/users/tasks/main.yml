@@ -8,13 +8,8 @@
     mode: "0440"
     content: |
       Defaults use_pty
-      Defaults logfile="{{ sudo_logfile | default('/var/log/sudo.log') }}"
-      Defaults timestamp_timeout={{ sudo_timestamp_timeout | default(5) }}
-
-- name: Remove legacy separate sudoers timeout configuration if present
-  ansible.builtin.file:
-    path: /etc/sudoers.d/60-cis-sudo
-    state: absent
+      Defaults logfile="/var/log/sudo.log"
+      Defaults timestamp_timeout=5
 
 - name: Validate sudo configuration
   ansible.builtin.command:

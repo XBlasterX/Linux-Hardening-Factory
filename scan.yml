@@ -4,5 +4,4 @@
   hosts: webservers
 
   roles:
-    - baseline
     - compliance
