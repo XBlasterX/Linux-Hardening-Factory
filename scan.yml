@@ -1,5 +1,5 @@
 ---
-- name: Harden RHEL web server fleet
+- name: Run OpenSCAP compliance scan on RHEL web server fleet
   become: true
   hosts: webservers
 

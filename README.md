@@ -77,14 +77,14 @@ The **OpenSCAP score** and **pass rate** are different metrics. Neither is a per
 
 Remote SSH hardening is risky because an incorrect configuration can lock out the administrator. This repository contains both a tested **manual recovery experiment** and an Ansible workflow intended to protect SSH updates.
 
-1. A root-owned backup of `/etc/ssh/sshd_config.d/00-hardening.conf` is stored under `/var/lib/ssh-hardening/`.
-2. [`ssh-rollback.sh`](roles/ssh_hardening/files/ssh-rollback.sh) restores the backup, checks the configuration with `sshd -t`, and reloads `sshd`.
+1. If an existing drop-in is present, a root-owned backup of `/etc/ssh/sshd_config.d/00-hardening.conf` is preserved under `/var/lib/ssh-hardening/`. On a fresh installation where no drop-in existed, rollback reverts by safely removing the newly introduced drop-in.
+2. [`ssh-rollback.sh`](roles/ssh_hardening/files/ssh-rollback.sh) restores the backup (or removes the unverified drop-in), checks the configuration with `sshd -t`, and reloads `sshd`.
 3. The Ansible role previews changes and, when necessary, schedules a one-shot rollback using `systemd-run --on-active=180s` **before** deploying the updated SSH template.
 4. Ansible reloads SSH, resets its connection and waits for connectivity, then attempts to cancel the pending timer.
 
 In a deliberate lockout test, the scheduled rollback restored SSH access. The service journal showed successful execution (`Result=success`, `ExecMainStatus=0`).
 
-**Important limitations:** The current backup task expects the SSH drop-in to exist already; it is **not** a fresh-install bootstrap mechanism. The backup is created only if absent and may become stale. The cancellation logic checks Ansible reconnection, not an independent authorized login with the intended credentials. These limitations must be addressed before unattended or production use.
+**Important considerations:** The rollback mechanism protects both initial deployments and iterative configuration updates. The cancellation logic verifies Ansible reconnection, not an independent interactive login with user credentials.
 
 ## Validation and GitHub Actions
 
@@ -104,18 +104,19 @@ A passing CI run verifies **static checks**, not end-to-end hardening or complia
 .
 ├── .github/workflows/validate.yml    # Static CI pipeline
 ├── collections/requirements.yml      # Ansible collections
-├── inventory/hosts.ini               # Example RHEL VM inventory
+├── group_vars/all.yml                # Central configuration defaults
+├── inventory/hosts.ini               # Lab RHEL VM inventory
 ├── roles/
-│   ├── baseline/                      # Security tools and sudo timeout
-│   ├── users/                         # Sudo defaults
+│   ├── baseline/                      # Security assessment packages
+│   ├── users/                         # Sudo security defaults and timeout
 │   ├── banners/                       # Login banners
-│   ├── integrity/                     # AIDE
-│   ├── ssh_hardening/                 # SSH template and rollback
-│   ├── kernel_hardening/              # sysctl controls
-│   ├── firewall/                      # firewalld
-│   ├── selinux/                       # SELinux labels and permissions
+│   ├── integrity/                     # AIDE integrity checks and cron service
+│   ├── ssh_hardening/                 # SSH template, rollback script, and timer
+│   ├── kernel_hardening/              # sysctl kernel/network controls
+│   ├── firewall/                      # firewalld package and zone rules
+│   ├── selinux/                       # SELinux policy, directories, and labels
 │   ├── auditd/                        # Audit monitoring rules
-│   └── compliance/                    # OpenSCAP assessment tasks
+│   └── compliance/                    # OpenSCAP assessment tasks and defaults
 ├── scripts/parse_oscap.py            # XML -> Markdown summary
 ├── reports/                           # Scans and checkpoints
 ├── bootstrap.yml                      # Automation account provisioning
@@ -126,7 +127,7 @@ A passing CI run verifies **static checks**, not end-to-end hardening or complia
 
 ## Requirements and Usage
 
-**Environment assumptions:** RHEL 10 lab VMs, working administrative SSH access, Python/Ansible on the controller, privilege escalation, suitable RHEL package repositories, and the RHEL 10 SCAP Security Guide data stream (`/usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml`). The current configuration also assumes an existing Apache content tree at `/srv/prodapp/public` and an existing SSH drop-in at `/etc/ssh/sshd_config.d/00-hardening.conf`. **These playbooks are not plug-and-play on a fresh or arbitrary RHEL machine.**
+**Environment assumptions:** RHEL 10 lab VMs, working administrative SSH access, Python/Ansible on the controller, privilege escalation, suitable RHEL package repositories, and the RHEL 10 SCAP Security Guide data stream (`/usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml`). The roles ensure prerequisite packages (firewalld, cronie, AIDE, OpenSCAP) and directory structures are initialized automatically.
 
 ```bash
 # 1. Install Ansible collections
@@ -147,12 +148,12 @@ ansible-playbook scan.yml -e "scan_phase=after"
 python3 scripts/parse_oscap.py reports/after
 ```
 
-[`bootstrap.yml`](bootstrap.yml) is provided to create the Ansible administration account and install the controller's SSH public key, but it needs **working initial administrative credentials**. It also grants `NOPASSWD: ALL` sudo privileges to that account; do not adopt this model unchanged for production systems.
+[`bootstrap.yml`](bootstrap.yml) is provided to create the Ansible administration account and install the controller's SSH public key (configurable via `ssh_public_key_path` or `SSH_PUBLIC_KEY_PATH`), but it needs **working initial administrative credentials**. It also grants `NOPASSWD: ALL` sudo privileges to that account; do not adopt this model unchanged for production systems.
 
 Local static validation:
 
 ```bash
-ansible-playbook site.yml --syntax-check
+ansible-playbook site.yml scan.yml bootstrap.yml --syntax-check
 ansible-lint .
 python3 -m py_compile scripts/parse_oscap.py
 ```
@@ -160,10 +161,10 @@ python3 -m py_compile scripts/parse_oscap.py
 ## Limitations and Future Work
 
 - The assessed VMs still have numerous CIS failures; **no full compliance claim** is made.
-- The roles depend on specific RHEL paths, services, packages and existing host state.
-- The SSH rollback should be made more robust, especially on fresh installations and when handling stale backups or verifying login semantics.
+- The roles target RHEL 10 and rely on standard RHEL package repositories and data streams.
+- The SSH rollback cancellation logic verifies Ansible connection resumption, rather than a separate non-privileged credential challenge.
 - OpenSCAP and SSH recovery tests are not yet automated on disposable RHEL runners in CI.
-- Further improvements could add fixture-based Python tests, role integration tests, host-specific configuration variables, and machine-readable compliance deltas.
+- Further improvements could add fixture-based Python tests, role integration tests, and automated compliance delta reporting.
 
 ## Skills Demonstrated
 

@@ -1,5 +1,5 @@
 ---
-- name: Create files
+- name: Create rollback state directory
   ansible.builtin.file:
     path: /var/lib/ssh-hardening/
     state: directory
@@ -7,7 +7,12 @@
     group: root
     mode: '0700'
 
-- name: Backup copy
+- name: Check whether existing SSH drop-in configuration exists
+  ansible.builtin.stat:
+    path: /etc/ssh/sshd_config.d/00-hardening.conf
+  register: ssh_hardening_existing_conf
+
+- name: Backup current SSH drop-in configuration
   ansible.builtin.copy:
     remote_src: true
     src: /etc/ssh/sshd_config.d/00-hardening.conf
@@ -16,8 +21,9 @@
     owner: root
     group: root
     force: false
+  when: ssh_hardening_existing_conf.stat.exists
 
-- name: Rollback install
+- name: Install rollback script
   ansible.builtin.copy:
     src: ssh-rollback.sh
     dest: /usr/local/sbin/ssh-rollback.sh
@@ -25,7 +31,7 @@
     owner: root
     group: root
 
-- name: Check conf changes
+- name: Preview SSH configuration changes
   ansible.builtin.template:
     src: sshd_config.j2
     dest: /etc/ssh/sshd_config.d/00-hardening.conf
@@ -35,7 +41,7 @@
   check_mode: true
   register: ssh_hardening_ssh_config_preview
 
-- name: Schedule SSH rollback # noqa: no-handler
+- name: Schedule SSH rollback  # noqa: no-handler
   ansible.builtin.command:
     argv:
       - systemd-run
@@ -45,7 +51,7 @@
   when: ssh_hardening_ssh_config_preview.changed
   changed_when: true
 
-- name: Config safe SSH
+- name: Apply hardened SSH configuration
   ansible.builtin.template:
     src: sshd_config.j2
     dest: /etc/ssh/sshd_config.d/00-hardening.conf
@@ -53,20 +59,20 @@
     group: root
     mode: '0600'
     validate: /usr/sbin/sshd -t -f %s
-  notify: Restart sshd
+  notify: Reload sshd
 
-- name: Force handlers
+- name: Flush handlers
   ansible.builtin.meta: flush_handlers
 
 - name: Reset connection
   ansible.builtin.meta: reset_connection
 
-- name: Wait for connection
+- name: Verify SSH connectivity
   ansible.builtin.wait_for_connection:
     delay: 3
     timeout: 25
 
-- name: Cancel timer # noqa: no-handler
+- name: Cancel rollback timer  # noqa: no-handler
   ansible.builtin.systemd:
     name: ssh-rollback.timer
     state: stopped

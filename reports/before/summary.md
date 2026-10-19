@@ -1,6 +1,8 @@
 # OpenSCAP CIS Baseline Summary
 
-7912
+## web01
+
+- OpenSCAP score: 70.867912
 - PASS: 170
 - FAIL: 124
 - NOT APPLICABLE: 30

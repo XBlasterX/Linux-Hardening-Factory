@@ -1,22 +1,32 @@
 ---
-- name: Selinux policy
+- name: Set SELinux targeted policy to enforcing
   ansible.posix.selinux:
     state: enforcing
     policy: targeted
 
-- name: Apache catalog permissions
+- name: Ensure demo web application directories exist
   ansible.builtin.file:
     path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
     mode: "{{ item.mode }}"
   loop:
     - path: /srv/prodapp
       mode: '0711'
     - path: /srv/prodapp/public
       mode: '0755'
-    - path: /srv/prodapp/public/index.html
-      mode: '0644'
 
-- name: Apache catalog permissions
+- name: Ensure demo web index file exists
+  ansible.builtin.copy:
+    dest: /srv/prodapp/public/index.html
+    content: "<!DOCTYPE html><html><body>Production App Demo</body></html>\n"
+    owner: root
+    group: root
+    mode: '0644'
+    force: false
+
+- name: Set SELinux file context for demo web content
   community.general.sefcontext:
     target: '/srv/prodapp/public(/.*)?'
     setype: httpd_sys_content_t

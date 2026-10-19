@@ -1,13 +1,16 @@
 ---
-- name: Firewalld state
+- name: Ensure firewalld package is installed
+  ansible.builtin.dnf:
+    name: firewalld
+    state: present
+
+- name: Ensure firewalld service is enabled and running
   ansible.builtin.systemd_service:
-    service: "{{ item }}"
+    service: firewalld
     enabled: true
     state: started
-  loop:
-    - firewalld
 
-- name: Enable ssh
+- name: Allow SSH service in public zone
   ansible.posix.firewalld:
     service: ssh
     state: enabled
@@ -15,15 +18,15 @@
     permanent: true
     immediate: true
 
-- name: Open HTTP
+- name: Allow HTTP port in public zone
   ansible.posix.firewalld:
+    port: 80/tcp
     state: enabled
     zone: public
-    port: 80/tcp
     permanent: true
     immediate: true
 
-- name: Close cockpit
+- name: Disable cockpit service in public zone
   ansible.posix.firewalld:
     service: cockpit
     state: disabled
